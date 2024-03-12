@@ -6,7 +6,7 @@ WORKDIR /app
 RUN apt update
 RUN apt install curl -y
 RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash
-RUN apt install nodejs
+RUN apt install nodejs -y
 RUN npm install -g npm@9.2.0
 RUN npm install -g nodemon
 
