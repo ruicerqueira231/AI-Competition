@@ -1,4 +1,4 @@
-from random import randint
+from random import randint, choice
 
 from games.connect4.action import Connect4Action
 from games.connect4.player import Connect4Player
@@ -12,7 +12,7 @@ class RandomConnect4Player(Connect4Player):
         super().__init__(name)
 
     def get_action(self, state: Connect4State):
-        return Connect4Action(randint(0, state.get_num_cols()))
+        return choice(state.get_possible_actions())
 
     def event_action(self, pos: int, action, new_state: State):
         # ignore
