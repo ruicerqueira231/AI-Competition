@@ -187,3 +187,19 @@ class GameSimulator(ABC):
             for result in self.__results:
                 scores[name] += result[name]
         return scores
+
+
+    @staticmethod
+    @abstractmethod
+    def get_player_type():
+        pass
+
+    @staticmethod
+    @abstractmethod
+    def get_state_type():
+        pass
+
+    @staticmethod
+    @abstractmethod
+    def get_action_type():
+        pass

@@ -1,3 +1,4 @@
+from games.connect4.action import Connect4Action
 from games.connect4.player import Connect4Player
 from games.connect4.state import Connect4State
 from games.game_simulator import GameSimulator
@@ -23,3 +24,15 @@ class Connect4Simulator(GameSimulator):
     def on_end_game(self, state: Connect4State):
         # ignored for this simulator
         pass
+
+    @staticmethod
+    def get_player_type():
+        return Connect4Player
+
+    @staticmethod
+    def get_state_type():
+        return Connect4State
+
+    @staticmethod
+    def get_action_type():
+        return Connect4Action

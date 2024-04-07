@@ -1,9 +1,7 @@
-from games.hlpoker.action import HLPokerAction
 from games.hlpoker.player import HLPokerPlayer
 from games.hlpoker.state import HLPokerState
-from random import choice
-
 from games.state import State
+from random import choice
 
 
 class RandomHLPokerPlayer(HLPokerPlayer):

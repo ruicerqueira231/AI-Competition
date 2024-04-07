@@ -3,6 +3,7 @@ from random import shuffle
 from termcolor import cprint
 
 from games.game_simulator import GameSimulator
+from games.hlpoker.action import HLPokerAction
 from games.hlpoker.card import Card, Suit, Rank
 from games.hlpoker.round import Round
 from games.hlpoker.state import HLPokerState
@@ -73,3 +74,15 @@ class HLPokerSimulator(GameSimulator):
     def on_end_game(self, state: HLPokerState):
         # ignored for this simulator
         pass
+
+    @staticmethod
+    def get_player_type():
+        return HLPokerPlayer
+
+    @staticmethod
+    def get_state_type():
+        return HLPokerState
+
+    @staticmethod
+    def get_action_type():
+        return HLPokerAction
