@@ -30,6 +30,5 @@ class Connect4Player(Player, ABC):
     def event_new_game(self):
         self.__num_games += 1
 
-    def event_result(self, pos: int, result: Connect4Result):
-        if pos == self.get_current_pos():
-            self.__stats[result] += 1
+    def event_result(self, pos: int, result):
+        pass

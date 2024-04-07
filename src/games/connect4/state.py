@@ -1,5 +1,7 @@
 from typing import Optional
 
+from termcolor import colored
+
 from games.connect4.action import Connect4Action
 from games.connect4.result import Connect4Result
 from games.state import State
@@ -118,11 +120,16 @@ class Connect4State(State):
         self.__turns_count += 1
 
     def __display_cell(self, row, col):
-        print({
-                  0: 'R',
-                  1: 'B',
-                  Connect4State.EMPTY_CELL: ' '
-              }[self.__grid[row][col]], end="")
+        cell_value = self.__grid[row][col]
+        if cell_value == 0:
+            # Player 1 - Red
+            print(colored('●', 'red'), end="")
+        elif cell_value == 1:
+            # Player 2 - Blue
+            print(colored('○', 'blue'), end="")
+        else:
+            # Empty cell
+            print(' ', end="")
 
     def __display_numbers(self):
         for col in range(0, self.__num_cols):
@@ -170,11 +177,11 @@ class Connect4State(State):
                 cloned_state.__grid[row][col] = self.__grid[row][col]
         return cloned_state
 
-    def get_result(self, pos) -> Optional[Connect4Result]:
+    def get_result(self, pos):
         if self.__has_winner:
-            return Connect4Result.LOOSE if pos == self.__acting_player else Connect4Result.WIN
+            return Connect4Result.LOOSE.value[0] if pos == self.__acting_player else Connect4Result.WIN.value[0]
         if self.__is_full():
-            return Connect4Result.DRAW
+            return Connect4Result.DRAW.value
         return None
 
     def get_num_rows(self):

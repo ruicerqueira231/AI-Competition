@@ -6,8 +6,8 @@ from games.game_simulator import GameSimulator
 
 class Connect4Simulator(GameSimulator):
 
-    def __init__(self, player1: Connect4Player, player2: Connect4Player, num_rows: int = 6, num_cols: int = 7):
-        super(Connect4Simulator, self).__init__([player1, player2])
+    def __init__(self, players, num_rows: int = 6, num_cols: int = 7):
+        super(Connect4Simulator, self).__init__(players)
         """
         the number of rows and cols from the connect4 grid
         """
@@ -22,6 +22,10 @@ class Connect4Simulator(GameSimulator):
         pass
 
     def on_end_game(self, state: Connect4State):
+        # ignored for this simulator
+        pass
+
+    def on_state_update(self, state):
         # ignored for this simulator
         pass
 
