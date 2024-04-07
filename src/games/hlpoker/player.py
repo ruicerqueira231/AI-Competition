@@ -97,7 +97,7 @@ class HLPokerPlayer(Player, ABC):
     :param state: the current game state
     """
     def get_action(self, state):
-        return self.get_action(state, self.__private_cards, self.__board_cards)
+        return self.get_action_with_cards(state, self.__private_cards, self.__board_cards)
 
     @staticmethod
     def print_colored_cards(card_list):
@@ -150,7 +150,7 @@ class HLPokerPlayer(Player, ABC):
     gets called whenever a player needs to select the action to perform
     """
     @abstractmethod
-    def get_action(self, state, private_cards, board_cards):
+    def get_action_with_cards(self, state, private_cards, board_cards):
         pass
 
     """

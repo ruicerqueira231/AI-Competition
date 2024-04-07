@@ -1,6 +1,7 @@
 import argparse
 import itertools
 from collections import namedtuple, defaultdict
+from tqdm import tqdm
 
 from constants import AVAILABLE_GAME_TYPES, AVAILABLE_PLAYER_TYPES
 
@@ -8,51 +9,46 @@ def run_simulation(game_settings):
     removed_players = []
 
     while len(game_settings['players']) > 1:
-        # Initialize score tracking
         scores = defaultdict(int)
+        match_results = defaultdict(dict)
 
-        # Iterate over all pairs of players
         for player1, player2 in itertools.combinations(game_settings['players'], 2):
-            # Create a simulator with both players as an array
             simulator = game_settings['game']([player1, player2])
+            print(f"Simulation: {player1.get_name()} VS {player2.get_name()}")
 
-            iteration = 0
+            names = {player1.get_name(): player1, player2.get_name(): player2}
 
-            while True:
-                iteration += 1
-                print(f"Iteration {iteration}: {player1.get_name()} VS {player2.get_name()}")
-                simulator.run_simulation()
-                if game_settings['seat_permutation']:
-                    simulator.change_player_positions()
-                    print(f"Iteration {iteration}: {player2.get_name()} VS {player1.get_name()}")
-                    simulator.run_simulation()
+            # Run initial iterations with progress bar
+            for _ in tqdm(range(game_settings['num_iterations']), desc="Running iterations"):
+                run_game_iteration(simulator, game_settings['seat_permutation'])
 
-                update_scores(scores, simulator)
+            # Run additional iterations if there's a draw
+            while check_draw(simulator):
+                run_game_iteration(simulator, game_settings['seat_permutation'])
 
-                if iteration >= game_settings['num_iterations'] and not check_draw(simulator):
-                    break
+            update_scores(scores, simulator, names)
+
+            # Update match results for cross table
+            update_match_results(match_results, simulator, player1, player2)
 
             simulator.print_stats()
 
-            # Update global scores for each player after all iterations
-            update_scores(scores, simulator)
-
-            # Print stats for this pair of players
-            simulator.print_stats()
-
-        # Print the leaderboard before removing a player
+        # Print cross table and leaderboard before removing a player
+        print_cross_table(match_results)
         print_leaderboard(scores)
 
-        # Remove the player with the lowest score
         removed_player = remove_worst_player(game_settings['players'], scores)
-        removed_players.append(removed_player)
-
-        # Reset scores for the next round
-        scores.clear()
+        removed_players.insert(0, removed_player)
 
     last_remaining_player = game_settings['players'][0]
     removed_players.insert(0, last_remaining_player)
-    print_final_leaderboard(removed_players)
+    print_leaderboard(removed_players, final=True)
+
+def run_game_iteration(simulator, seat_permutation):
+    simulator.run_simulation()
+    if seat_permutation:
+        simulator.change_player_positions()
+        simulator.run_simulation()
 
 def check_draw(simulator):
     global_scores = simulator.get_global_score()
@@ -62,34 +58,47 @@ def check_draw(simulator):
         return True  # It's a draw
     return False  # Not a draw
 
-def update_scores(scores, simulator):
+def update_scores(scores, simulator, names):
     # Update global scores for each player
     global_scores = simulator.get_global_score()
     for player_name, score in global_scores.items():
-        scores[player_name] += score
+        scores[names[player_name]] += score
 
 def remove_worst_player(players, scores):
     # Find the player with the lowest score
-    lowest_score_player = min(players, key=lambda player: scores[player.get_name()])
+    lowest_score_player = min(players, key=lambda player: scores[player])
     players.remove(lowest_score_player)
     return lowest_score_player
 
-def print_leaderboard(scores):
-    sorted_scores = sorted(scores.items(), key=lambda x: x[1], reverse=True)
-    print("\n" + "=" * 40)
-    print("{:^40}".format("Leaderboard"))
-    print("=" * 40)
-    for position, (player_name, score) in enumerate(sorted_scores, start=1):
-        print("{:2}. {:<30} {:>5}".format(position, player_name, score))
-    print("=" * 40 + "\n")
+def update_match_results(match_results, simulator, player1, player2):
+    result = simulator.get_global_score()  # Assuming this method exists and returns the match result
+    match_results[player1.get_name()][player2.get_name()] = result[player1.get_name()]
+    match_results[player2.get_name()][player1.get_name()] = result[player2.get_name()]
 
-def print_final_leaderboard(removed_players):
-    print("\n" + "=" * 40)
-    print("{:^40}".format("Final Leaderboard"))
-    print("=" * 40)
-    for position, player in enumerate(removed_players, start=1):
-        print("{:2}. {:<30}".format(position, player.get_name()))
-    print("=" * 40 + "\n")
+def print_cross_table(match_results):
+    print("\nCross Table:")
+    player_names = sorted(match_results.keys())
+    print(" " * 15 + " ".join(f"{name:<15}" for name in player_names))
+    for name in player_names:
+        results = [match_results[name].get(opponent, 'N/A') for opponent in player_names]
+        print(f"{name:<15}" + " ".join(f"{result:<15}" for result in results))
+    print()
+
+def print_leaderboard(players, final=False):
+    print("\n" + "=" * 60)
+    title = "Final Leaderboard" if final else "Leaderboard"
+    print("{:^40}".format(title))
+    print("=" * 60)
+
+    if final:
+        for position, player in enumerate(players, start=1):
+            print("{:2}. {:<40}".format(position, f"{player.get_name()} ({player.__class__.__name__})"))
+    else:
+        sorted_scores = sorted(players.items(), key=lambda x: x[1], reverse=True)
+        for position, (player, score) in enumerate(sorted_scores, start=1):
+            print("{:2}. {:<40} {:>5}".format(position, f"{player.get_name()} ({player.__class__.__name__})", score))
+
+    print("=" * 60 + "\n")
 
 def main():
     # Define a namedtuple for a Player
@@ -106,8 +115,8 @@ def main():
                         help='Permute seats during the simulation. Defaults to True.')
 
     # Number of iterations (default: 1)
-    parser.add_argument('--num-iterations', type=int, default=1,
-                        help='Number of iterations in the simulation. Defaults to 1.')
+    parser.add_argument('--num-iterations', type=int, default=10000,
+                        help='Number of iterations in the simulation. Defaults to 10000.')
 
     # Player argument. This should be specified at least twice.
     parser.add_argument('--player', action='append', nargs=2, metavar=('NAME', 'TYPE'),
@@ -125,8 +134,15 @@ def main():
     except KeyError:
         parser.error(f"No player types available for the game '{args.game}'.")
 
+    used_names = set()
+
     players = []
     for name, type_name in args.player:
+        if name in used_names:
+            parser.error(f"Duplicate player name '{name}' is not allowed.")
+
+        used_names.add(name)
+
         # Find the player class that matches the provided type name
         player_class = None
         for cls in available_player_types:

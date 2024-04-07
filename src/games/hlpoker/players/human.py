@@ -10,7 +10,7 @@ class HumanHLPokerPlayer(HLPokerPlayer):
     def __init__(self, name):
         super().__init__(name)
 
-    def get_action(self, state: HLPokerState):
+    def get_action_with_cards(self, state: HLPokerState, private_cards, board_cards):
         print("------------------------------")
         self.print_state(state)
         return {
@@ -30,9 +30,12 @@ class HumanHLPokerPlayer(HLPokerPlayer):
 
     def event_new_game(self):
         print("--- New game ---")
-        self.get_private_cards()
 
     def event_end_game(self, final_state: State):
+        opp_cards = self.get_opponent_cards()
+        print(f">{self.get_name()}: My opponent cards were ", end="")
+        if not opp_cards[0] is None and not opp_cards[1] is None:
+            HLPokerPlayer.print_colored_cards(self.get_opponent_cards())
         print("--- End game ---")
 
     def event_result(self, pos: int, result: int):

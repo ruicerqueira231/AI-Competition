@@ -61,11 +61,12 @@ class HLPokerState(State):
             return False
 
         if action == HLPokerAction.RAISE and self.__raise_count >= HLPokerState.MAX_RAISES:
-            print(f"[error] can't raise more than {HLPokerState.MAX_RAISES} times")
+            #print(f"[error] can't raise more than {HLPokerState.MAX_RAISES} times")
             return False
 
         if action == HLPokerAction.FOLD and self.__raise_count == 0:
-            print(f"[error] can't fold before there are any raises")
+            #print(f"[error] can't fold before there are any raises")
+            return False
 
         return True
 
@@ -178,19 +179,22 @@ class HLPokerState(State):
         return evaluate_cards(*[card.__str__() for card in cards])
 
     def compute_results(self, p0cards, p1cards, board_cards):
-        if not self.is_showdown() and self.__winner is None:
-            raise ValueError("There should be a winner if we didn't reach showdown")
+        if self.is_showdown():
 
-        # Helper function to convert cards to strings and evaluate
-        p0_score = HLPokerState.evaluate_hand(p0cards + board_cards)
-        p1_score = HLPokerState.evaluate_hand(p1cards + board_cards)
+            # Helper function to convert cards to strings and evaluate
+            p0_score = HLPokerState.evaluate_hand(p0cards + board_cards)
+            p1_score = HLPokerState.evaluate_hand(p1cards + board_cards)
 
-        if p0_score > p1_score:
-            self.__winner = 1
-        elif p1_score > p0_score:
-            self.__winner = 0
+            if p0_score > p1_score:
+                self.__winner = 1
+            elif p1_score > p0_score:
+                self.__winner = 0
+            else:
+                self.__winner = None  # Tie
+
         else:
-            self.__winner = None  # Tie
+            if self.__winner is None:
+                raise ValueError("There should be a winner if we didn't reach showdown")
 
     def get_possible_actions(self):
-        return list(filter(self.validate_action, [action for action in HLPokerAction]))
+        return list(filter(lambda a : self.validate_action(a), [action for action in HLPokerAction]))

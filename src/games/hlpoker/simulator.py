@@ -66,6 +66,12 @@ class HLPokerSimulator(GameSimulator):
                 for pos in positions:
                     pos.event_show_board_cards(cards_to_show, new_round)
 
+            else:
+                # Notify all positions about the opponent's cards
+                players = self.get_player_positions()
+                players[0].event_show_opponent_cards(*self.__deck[2:4])
+                players[1].event_show_opponent_cards(*self.__deck[0:2])
+
     def on_before_end_game(self, state: HLPokerState):
         # if we reached the showdown, we are going to reveal the cards to all players
         state.compute_results(self.__deck[0:2], self.__deck[2:4], self.__deck[4:9])
