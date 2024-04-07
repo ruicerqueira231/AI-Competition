@@ -10,6 +10,10 @@ class GameSimulator(ABC):
         # only allow list of players
         assert len(list(filter(lambda p: not isinstance(p, Player), players))) <= 0
 
+        # Ensure all player names are unique
+        names = [player.get_name() for player in players]
+        assert len(names) == len(set(names)), "Player names must be unique"
+
         # stores the possible permutations between players
         self.__permutations = []
 
@@ -17,6 +21,9 @@ class GameSimulator(ABC):
 
         # the selected permutation for the current game
         self.__current_permutation = 0
+
+        # the results of all games between all players
+        self.__results = []
 
     """
     Adapted from https://www.geeksforgeeks.org/heaps-algorithm-for-generating-permutations/
@@ -66,7 +73,7 @@ class GameSimulator(ABC):
     """
 
     @abstractmethod
-    def init_game(self) -> State:
+    def on_init_game(self) -> State:
         pass
 
     """
@@ -74,7 +81,7 @@ class GameSimulator(ABC):
     """
 
     @abstractmethod
-    def before_end_game(self, state):
+    def on_before_end_game(self, state):
         pass
 
     """
@@ -82,11 +89,18 @@ class GameSimulator(ABC):
     """
 
     @abstractmethod
-    def end_game(self, state):
+    def on_end_game(self, state):
         pass
 
+
     """
+    event that occur when a game state is updated
     """
+
+    @abstractmethod
+    def on_state_update(self, state):
+        pass
+
 
     def get_player_positions(self):
         return self.__permutations[self.__current_permutation]
@@ -95,7 +109,7 @@ class GameSimulator(ABC):
     runs the simulation
     """
     def run_simulation(self):
-        state = self.init_game()
+        state = self.on_init_game()
         players = self.get_player_positions()
 
         # notify players a new game is starting
@@ -120,22 +134,33 @@ class GameSimulator(ABC):
             for player in players:
                 player.event_action(pos, selected_action, state.clone())
 
-        # handler to run before the game ends
-        self.before_end_game(state)
+            # the simulator will run an optional hanlder for each updated state
+            self.on_state_update(state)
 
-        # notify all players of the result each player got
+        # handler to run before the game ends
+        self.on_before_end_game(state)
+
+        result = {}
         for player in players:
-            for pos in range(0, len(players)):
+            # notify the player of the result in each position
+            for pos in range(len(players)):
                 player.event_result(pos, state.get_result(pos))
+
+            # store the result for that player
+            result[player.get_name()] = state.get_result(player.get_current_pos())
             player.event_end_game(state.clone())
 
+        self.__results.append(result)
+
         # handler to run after a game ends
-        self.end_game(state)
+        self.on_end_game(state)
 
     # prints the stats for all players
     def print_stats(self):
+        scores = self.get_global_score()
         for player in self.__permutations[0]:
-            player.print_stats()
+            name = player.get_name()
+            print(f"Player {name} | Total score: ${scores[name]} | Avg. score per game: ${scores[name] / len(self.__results)}")
 
     # returns the list of players
     def get_players(self):
@@ -148,3 +173,17 @@ class GameSimulator(ABC):
     # gets the number os players
     def num_players(self):
         return len(self.__permutations[0])
+
+    # gets the results of all games
+    def get_results(self):
+        return self.__results
+
+    # gets the scores of all players
+    def get_global_score(self):
+        scores = {}
+        for player in self.__permutations[0]:
+            name = player.get_name()
+            scores[name] = 0
+            for result in self.__results:
+                scores[name] += result[name]
+        return scores

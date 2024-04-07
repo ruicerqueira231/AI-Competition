@@ -1,24 +1,27 @@
-FROM python:3.9.15-slim
+FROM python:3.12.2-alpine3.19
 
 WORKDIR /app
 
-# install nodemon
-RUN apt update
-RUN apt install curl -y
-RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash
-RUN apt install nodejs -y
-RUN npm install -g npm@9.2.0
-RUN npm install -g nodemon
+# Install nodemon and nodejs
+RUN apk update && \
+    apk add --no-cache curl nodejs npm && \
+    npm install -g npm@10.5.1 nodemon
 
-# install pg_config
-RUN apt install libpq-dev -y
-RUN apt install build-essential -y
-
-# upgrade pip
+# Upgrade pip
 RUN python -m pip install --upgrade pip
 
-# dependencies from requirements.txt
+# Install Python dependencies from requirements.txt
 COPY ./requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
-CMD python main.py
+# Copy the entrypoint script into the container
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+
+# Make the entrypoint script executable
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
+# Set the entrypoint
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+
+# Set default command (to be overridden by ENTRYPOINT script)
+CMD ["main.py"]

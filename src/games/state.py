@@ -41,7 +41,7 @@ class State(ABC):
         pass
 
     """ 
-    Returns the index of the current acting player, between [0, num_players[
+    Returns the id of the current acting player, between [0, num_players[
     """
     @abstractmethod
     def get_acting_player(self) -> int:

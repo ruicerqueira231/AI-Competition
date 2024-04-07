@@ -13,13 +13,13 @@ class Connect4Simulator(GameSimulator):
         self.__num_rows = num_rows
         self.__num_cols = num_cols
 
-    def init_game(self):
+    def on_init_game(self):
         return Connect4State(self.__num_rows, self.__num_cols)
 
-    def before_end_game(self, state: Connect4State):
+    def on_before_end_game(self, state: Connect4State):
         # ignored for this simulator
         pass
 
-    def end_game(self, state: Connect4State):
+    def on_end_game(self, state: Connect4State):
         # ignored for this simulator
         pass
