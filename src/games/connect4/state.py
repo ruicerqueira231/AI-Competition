@@ -200,8 +200,3 @@ class Connect4State(State):
                 lambda pos: Connect4Action(pos),
                 range(0, self.get_num_cols()))
         ))
-
-    def sim_play(self, action):
-        new_state = self.clone()
-        new_state.play(action)
-        return new_state

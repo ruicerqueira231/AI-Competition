@@ -22,13 +22,10 @@ class Connect4Player(Player, ABC):
         self.__num_games = 0
 
     def print_stats(self):
-        num_wins = self.__stats[Connect4Result.WIN]
-        print(
-            f"Player {self.get_name()}: {num_wins}/{self.__num_games} wins ({num_wins * 100.0 / self.__num_games} win "
-            f"rate)")
+        pass
 
     def event_new_game(self):
-        self.__num_games += 1
+        pass
 
     def event_result(self, pos: int, result):
         pass
