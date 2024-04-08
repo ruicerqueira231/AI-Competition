@@ -179,7 +179,7 @@ class Connect4State(State):
 
     def get_result(self, pos):
         if self.__has_winner:
-            return Connect4Result.LOOSE.value[0] if pos == self.__acting_player else Connect4Result.WIN.value[0]
+            return Connect4Result.LOOSE.value if pos == self.__acting_player else Connect4Result.WIN.value
         if self.__is_full():
             return Connect4Result.DRAW.value
         return None
