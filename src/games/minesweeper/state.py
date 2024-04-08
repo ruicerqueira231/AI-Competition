@@ -135,11 +135,6 @@ class MinesweeperState(State):
     def get_acting_player(self) -> int:
         return self.__acting_player
 
-
-        """
-        the grid
-        """
-
     def clone(self):
         cloned_state = MinesweeperState(self.__num_rows, self.__num_cols)
         cloned_state.__num_rows = self.__num_rows
@@ -156,7 +151,7 @@ class MinesweeperState(State):
         return cloned_state
 
     def get_result(self, pos):
-        return MinesweeperResult.LOOSE.value if pos == self.__acting_player else MinesweeperResult.WIN.value
+        return MinesweeperResult.WIN.value if self.__mines_hit[pos] < self.__mines_hit[1 - pos] else MinesweeperResult.LOOSE.value
 
     def get_num_rows(self):
         return self.__num_rows
