@@ -160,7 +160,7 @@ class GameSimulator(ABC):
         scores = self.get_global_score()
         for player in self.__permutations[0]:
             name = player.get_name()
-            print(f"Player {name} | Total score: ${scores[name]} | Avg. score per game: ${scores[name] / len(self.__results)}")
+            print(f"Player {name} | Total score: {scores[name]}$ | Avg. score per game: {scores[name] / len(self.__results)}$")
 
     # returns the list of players
     def get_players(self):
