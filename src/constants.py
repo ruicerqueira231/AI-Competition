@@ -6,10 +6,12 @@ from pathlib import Path
 
 from games.connect4.simulator import Connect4Simulator
 from games.hlpoker.simulator import HLPokerSimulator
+from games.minesweeper.simulator import MinesweeperSimulator
 
 AVAILABLE_GAME_TYPES = {
-    "hlpoker":    HLPokerSimulator,
-    "connect4": Connect4Simulator
+    "hlpoker":      HLPokerSimulator,
+    "connect4":     Connect4Simulator,
+    "minesweeper":  MinesweeperSimulator
 }
 
 
