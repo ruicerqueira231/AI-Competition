@@ -44,6 +44,5 @@ class HumanHLPokerPlayer(HLPokerPlayer):
 
     def event_new_round(self, round: Round):
         if round.value > Round.Preflop.value:
-            #!WARN: Lower score is better
             print(f">{self.get_name()}: My current hand score in {round} round is {HLPokerState.evaluate_hand(self.get_private_cards() + self.get_board_cards())}")
 
